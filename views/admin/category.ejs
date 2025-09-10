@@ -150,6 +150,7 @@
                         <th class="min-w-125px">Sr.no</th>
                         <th class="min-w-125px">Created date</th>
                         <th class="min-w-125px">name</th>
+                        <th class="min-w-125px">status</th>
                         <th class="min-w-125px">Actions</th>
                       </tr>
                     </thead>
@@ -160,47 +161,103 @@
                       <tr>
                         <td class="ps-3"><%= i+1 %></td>
                         <td class="pe-0 fw-bolder text-gray-800">
-                          <% const date = new Date(category[i].createdAt);const year = date.getFullYear();const month = date.getMonth() + 1; const day = date.getDate(); %>
-                          <%= `${year}-${month}-${day}` %>
+                          <%= category[i].createdAt %>
                         </td>
                         <td class=" pe-0 fw-bolder text-gray-800"><%= category[i].name  %> </td>
-                        <td class="pe-0">
-                          <div class="d-flex align-items-center">
-                            <% for(let j in loginData){ %>
-                            <% if(String(loginData[j]._id) === String(locals.admin._id)) {%>
-                            <% if(loginData[j].is_admin === 1){ %>
-                            <!-- edit -->
-                            <a data-bs-toggle="modal" data-bs-target="#kt_modal_edit_category<%= i %>">
-                              <div class="symbol symbol-40px symbol-circle">
-                                <div class="symbol-label bg-light-primary text-primary"><i class="ki-solid ki-pencil fs-2 text-primary"></i></div>
-                              </div>
-                            </a>
-                            <!-- delete -->
-                            <a data-bs-toggle="modal" data-bs-target="#kt_modal_delete_category<%= i %>">
-                              <div class="symbol symbol-40px symbol-circle">
-                                <div class="symbol-label bg-light-danger text-danger"><i class="ki-solid ki-trash fs-2 text-danger"></i></div>
-                              </div>
-                            </a>
-                            <% } else if (loginData[j].is_admin === 0){ %>
-                            <!-- edit -->
-                            <a data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>edit diet category</b>. As a <b>demo admin</b>, you can only view the content.">
-                              <div class="symbol symbol-40px symbol-circle">
-                                <div class="symbol-label bg-light-primary text-primary"><i class="ki-solid ki-pencil fs-2 text-primary"></i></div>
-                              </div>
-                            </a>
-                            <!-- delete -->
-                            <a data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>delete diet category</b>. As a <b>demo admin</b>, you can only view the content.">
-                              <div class="symbol symbol-40px symbol-circle">
-                                <div class="symbol-label bg-light-danger text-danger"><i class="ki-solid ki-trash fs-2 text-danger"></i></div>
-                              </div>
-                            </a>
+                        <% for(let j in loginData){ %>
+                          <% if(String(loginData[j]._id) === String(locals.admin._id)) {%>
+                          <% if(loginData[j].is_admin === 1){ %>
+                          <td class="pe-0" data-bs-toggle="modal" data-bs-target="#kt_modal_change_status<%= i %>">
+                            <% if (category[i].status === "Publish") { %>
+                            <div class="badge badge-success">Publish</div>
+                            <% } else { %>
+                            <div class="badge badge-danger">UnPublish</div>
                             <% } %>
+                          </td>
+                          <% } else if (loginData[j].is_admin === 0){ %>
+                          <td class="pe-0" data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>change category status</b>. As a <b>demo admin</b>, you can only view the content.">
+                            <% if (category[i].status === "Publish") { %>
+                            <div class="badge badge-success">Publish</div>
+                            <% } else { %>
+                            <div class="badge badge-danger">UnPublish</div>
                             <% } %>
-                            <% } %>
-                          </div>
-                        </td>
+                          </td>
+                          <% } %>
+                          <% } %>
+                          <% } %>
+                          <td class="pe-0">
+                            <div class="d-flex align-items-center">
+                              <% for(let j in loginData){ %>
+                              <% if(String(loginData[j]._id) === String(locals.admin._id)) {%>
+                              <% if(loginData[j].is_admin === 1){ %>
+                              <!-- edit -->
+                              <a data-bs-toggle="modal" data-bs-target="#kt_modal_edit_category<%= i %>">
+                                <div class="symbol symbol-40px symbol-circle">
+                                  <div class="symbol-label bg-light-primary text-primary"><i class="ki-solid ki-pencil fs-2 text-primary"></i></div>
+                                </div>
+                              </a>
+                              <!-- delete -->
+                              <a data-bs-toggle="modal" data-bs-target="#kt_modal_delete_category<%= i %>">
+                                <div class="symbol symbol-40px symbol-circle">
+                                  <div class="symbol-label bg-light-danger text-danger"><i class="ki-solid ki-trash fs-2 text-danger"></i></div>
+                                </div>
+                              </a>
+                              <% } else if (loginData[j].is_admin === 0){ %>
+                              <!-- edit -->
+                              <a data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>edit category</b>. As a <b>demo admin</b>, you can only view the content.">
+                                <div class="symbol symbol-40px symbol-circle">
+                                  <div class="symbol-label bg-light-primary text-primary"><i class="ki-solid ki-pencil fs-2 text-primary"></i></div>
+                                </div>
+                              </a>
+                              <!-- delete -->
+                              <a data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>delete category</b>. As a <b>demo admin</b>, you can only view the content.">
+                                <div class="symbol symbol-40px symbol-circle">
+                                  <div class="symbol-label bg-light-danger text-danger"><i class="ki-solid ki-trash fs-2 text-danger"></i></div>
+                                </div>
+                              </a>
+                              <% } %>
+                              <% } %>
+                              <% } %>
+                            </div>
+                          </td>
                       </tr>
                       <!-- end::tr -->
+
+                           <!-- begin::Modal - Enable/Disable category -->
+                           <div class=" modal fade" id="kt_modal_change_status<%= i %>" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                            <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title fs-1" id="confirmLabel">Confirmation</h5>
+                                  <!--begin::Close-->
+                                  <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                                    <i class="ki-duotone ki-cross fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                  </div>
+                                  <!--end::Close-->
+                                </div>
+    
+                                <!-- begin::modal-body -->
+                                <div class="modal-body">
+                                  <p class="message text-center fs-3 mb-0">
+                                    Are you sure ..!! you want to <%= category[i].status ? 'unpublish' : 'publish' %> the category <b><%= category[i].name %></b> ..?
+                                  </p>
+                                </div>
+                                <!-- end::modal-body -->
+    
+                                <!-- begin::modal-footer -->
+                                <div class="modal-footer">
+                                  <a href="/update-category-status?id=<%= category[i]._id %>">
+                                    <button type="button" class="btn <%= category[i].status ===  "Publish" ? 'btn-danger' : 'btn-success' %>">
+                                      <%= category[i].status === "Publish" ? 'UnPublish' : 'Publish' %>
+                                    </button>
+                                  </a>
+                                </div>
+                                <!-- end::modal-footer -->
+    
+                              </div>
+                            </div>
+                          </div>
+                          <!--end::Modal - Enable/Disable category -->
 
                       <!--begin::Modal - edit category-->
                       <div class="modal fade" id="kt_modal_edit_category<%= i %>" tabindex="-1" data-bs-backdrop="static">
@@ -359,7 +416,7 @@
           <!--begin::Copyright-->
           <div class="text-dark order-2 order-md-1">
             <span class="text-muted fw-semibold me-1"></span>
-            <a href="#" target="_blank" class="text-gray-800 text-hover-primary"></a>
+            <a  class="text-gray-800 text-hover-primary"></a>
           </div>
           <!--end::Copyright-->
         </div>

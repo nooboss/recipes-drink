@@ -61,7 +61,7 @@ const addRecipe = async (req, res) => {
             //save recipe
             const newRecipe = await new recipeModel(
                 {
-                    name, image, ingredients: ingredients.map(item => item.ingredients), categoryId, cuisinesId, prepTime, cookTime,
+                    name, image, ingredients: Array.isArray(req.body.ingredientslist) ? ingredients.map(item => item.ingredients) : null, categoryId, cuisinesId, prepTime, cookTime,
                     totalCookTime, servings, difficultyLevel, url, video,
                     overview, how_to_cook: how_to_cook, gallery
                 }
@@ -121,10 +121,13 @@ const loadRecipe = async (req, res) => {
         // Fetch all recipe data 
         const recipe = await recipeModel.find().populate("categoryId cuisinesId");
 
+        // Fetch all category
+        const categories = await categoryModel.find();
+
         //  fetch admin
         const loginData = await loginModel.find();
 
-        return res.render("recipe", { recipe, IMAGE_URL: process.env.IMAGE_URL, loginData });
+        return res.render("recipe", { recipe, categories, IMAGE_URL: process.env.IMAGE_URL, loginData });
 
     } catch (error) {
         console.log(error.message);
@@ -163,7 +166,7 @@ const editRecipe = async (req, res) => {
         // Extract data from the request
         const id = req.body.id;
         const name = req.body.recipename;
-        const ingredients = req.body.ingredientslist;
+        const ingredients = req.body.ingredientslist || null;
         const oldImage = req.body.oldImage;
         const categoryId = req.body.category;
         const cuisinesId = req.body.cuisines;
@@ -193,6 +196,7 @@ const editRecipe = async (req, res) => {
 
         }
 
+
         //update recipe
         const updatedRecipe = await recipeModel.findByIdAndUpdate(
             { _id: id },
@@ -200,7 +204,7 @@ const editRecipe = async (req, res) => {
                 $set: {
                     name, image, categoryId, cuisinesId, prepTime, cookTime, totalCookTime, servings,
                     difficultyLevel, video, url, overview: overview,
-                    ingredients: ingredients.map(item => item.ingredients), how_to_cook: how_to_cook
+                    ingredients: Array.isArray(req.body.ingredientslist) ? ingredients.map(item => item.ingredients) : null, how_to_cook: how_to_cook
                 }
             },
             { new: true }
@@ -248,6 +252,41 @@ const deleteRecipe = async (req, res) => {
 
     } catch (error) {
         console.log(error.message);
+    }
+}
+
+// update recipe status
+const updateRecipeStatus = async (req, res) => {
+
+    try {
+
+        // Extract data from the request query
+        const id = req.query.id;
+
+        // Validate id
+        if (!id) {
+            req.flash('error', 'Something went wrong. Please try again.');
+            return res.redirect('back');
+        }
+
+        // Find the current point using the ID
+        const recipe = await recipeModel.findById(id);
+
+        // Check if category exists
+        if (!recipe) {
+            req.flash('error', 'Recipe Not Found');
+            return res.redirect('back');
+        }
+
+        // Toggle status
+        const updatedRecipe = await recipeModel.findByIdAndUpdate(id, { status: recipe.status === "Publish" ? "UnPublish" : "Publish" }, { new: true });
+
+        return res.redirect('back');
+
+    } catch (error) {
+        console.log(error.message);
+        req.flash('error', 'Something went wrong. Please try again.');
+        res.redirect('back');
     }
 }
 
@@ -368,6 +407,7 @@ module.exports = {
     loadEditRecipe,
     editRecipe,
     deleteRecipe,
+    updateRecipeStatus,
     loadGallery,
     addImage,
     editImage,

@@ -28,8 +28,6 @@ const login = async (req, res) => {
 
     try {
 
-
-        // Extract data from the request body
         const email = req.body.email;
         const password = sha256.x2(req.body.password);
 
@@ -65,7 +63,6 @@ const loadDashboard = async (req, res) => {
 
     try {
 
-        // count
         const totalCategory = await categoryModel.countDocuments();
         const totalCuisines = await cuisinesModel.countDocuments();
         const totalRecipe = await recipeModel.countDocuments();
@@ -147,7 +144,7 @@ const loadEditProfile = async (req, res) => {
 
         const profile = await adminLoginModel.findById(id);
 
-        return res.render("editprofile", { profile, IMAGE_URL: process.env.IMAGE_URL });
+        return res.render("editProfile", { profile, IMAGE_URL: process.env.IMAGE_URL });
 
     } catch (error) {
         console.log(error.message);

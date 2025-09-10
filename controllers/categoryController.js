@@ -109,9 +109,45 @@ const deleteCategory = async (req, res) => {
     }
 }
 
+// update  category status
+const updateCategoryStatus = async (req, res) => {
+
+    try {
+
+        // Extract data from the request query
+        const id = req.query.id;
+
+        // Validate id
+        if (!id) {
+            req.flash('error', 'Something went wrong. Please try again.');
+            return res.redirect('back');
+        }
+
+        // Find the current point using the ID
+        const category = await categoryModel.findById(id);
+
+        // Check if category exists
+        if (!category) {
+            req.flash('error', 'Category Not Found');
+            return res.redirect('back');
+        }
+
+        // Toggle status
+        const updatedCategory = await categoryModel.findByIdAndUpdate(id, { status: category.status === "Publish" ? "UnPublish" : "Publish" }, { new: true });
+
+        return res.redirect('back');
+
+    } catch (error) {
+        console.log(error.message);
+        req.flash('error', 'Something went wrong. Please try again.');
+        res.redirect('back');
+    }
+}
+
 module.exports = {
     loadcategory,
     addCategory,
     editCategory,
-    deleteCategory
+    deleteCategory,
+    updateCategoryStatus
 }

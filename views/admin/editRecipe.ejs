@@ -197,27 +197,47 @@
                                     <div data-repeater-list="ingredientslist">
                                       <% if (recipe.ingredients && recipe.ingredients.length > 0) { %>
                                         <% recipe.ingredients.forEach((item, index) => { %>
-                                      <div data-repeater-item>
-                                        <div class="form-group row px-5">
-                                          <div class="col-md-6 mb-8">
-                                            <input type="text" name="ingredients" class="form-control form-control-lg form-control-solid" value="<%= item %>" placeholder="Enter an ingredient name, e.g., 1 teaspoon salt" required />
-                                          </div>
-                                          <div class="col-md-1 mb-8">
-                                            <a href="javascript:;" data-repeater-delete class="btn btn-flex btn-light-danger">
-                                              <i class="ki-duotone ki-trash fs-3">
-                                                <span class="path1"></span>
-                                                <span class="path2"></span>
-                                                <span class="path3"></span>
-                                                <span class="path4"></span>
-                                                <span class="path5"></span>
-                                              </i>
-                                              Delete
-                                            </a>
-                                          </div>
+                                            <div data-repeater-item>
+                                                <div class="form-group row px-5">
+                                                    <div class="col-md-6 mb-8">
+                                                        <input type="text" name="ingredients" class="form-control form-control-lg form-control-solid" value="<%= item %>" placeholder="Enter an ingredient name, e.g., 1 teaspoon salt" required />
+                                                    </div>
+                                                    <div class="col-md-1 mb-8">
+                                                        <a href="javascript:;" data-repeater-delete class="btn btn-flex btn-light-danger">
+                                                            <i class="ki-duotone ki-trash fs-3">
+                                                                <span class="path1"></span>
+                                                                <span class="path2"></span>
+                                                                <span class="path3"></span>
+                                                                <span class="path4"></span>
+                                                                <span class="path5"></span>
+                                                            </i>
+                                                            Delete
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <div data-repeater-item>
+                                            <div class="form-group row px-5">
+                                                <div class="col-md-6 mb-8">
+                                                    <input type="text" name="ingredients" class="form-control form-control-lg form-control-solid" value="" placeholder="Enter an ingredient name, e.g., 1 teaspoon salt" required />
+                                                </div>
+                                                <div class="col-md-1 mb-8">
+                                                    <a href="javascript:;" data-repeater-delete class="btn btn-flex btn-light-danger">
+                                                        <i class="ki-duotone ki-trash fs-3">
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+                                                            <span class="path3"></span>
+                                                            <span class="path4"></span>
+                                                            <span class="path5"></span>
+                                                        </i>
+                                                        Delete
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </div>
-                                      </div>
-                                      <% }); %>
-                                      <% } %>
+                                    <% } %>                                    
                                     </div>
                                   </div>
                                   <!--end::Form group-->
@@ -360,7 +380,7 @@
             <!--begin::Copyright-->
             <div class="text-dark order-2 order-md-1">
               <span class="text-muted fw-semibold me-1"></span>
-              <a href="#" target="_blank" class="text-gray-800 text-hover-primary"></a>
+              <a  class="text-gray-800 text-hover-primary"></a>
             </div>
             <!--end::Copyright-->
           </div>

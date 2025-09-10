@@ -10,15 +10,11 @@ const adsSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    android_banner_ad_id: {
-        type: String,
-        trim: true
-    },
     android_banner_ad_id_is_enable: {
         type: Number,
         default: 0
     },
-    android_interstitial_ad_id: {
+    android_banner_ad_id: {
         type: String,
         trim: true
     },
@@ -26,13 +22,17 @@ const adsSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    android_rewarded_ads: {
+    android_interstitial_ad_id: {
         type: String,
         trim: true
     },
     android_rewarded_ads_is_enable: {
         type: Number,
         default: 0
+    },
+    android_rewarded_ads: {
+        type: String,
+        trim: true
     },
     ios_is_enable: {
         type: Number,
@@ -42,15 +42,11 @@ const adsSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    ios_banner_ad_id: {
-        type: String,
-        trim: true
-    },
     ios_banner_ad_id_is_enable: {
         type: Number,
         default: 0
     },
-    ios_interstitial_ad_id: {
+    ios_banner_ad_id: {
         type: String,
         trim: true
     },
@@ -58,7 +54,7 @@ const adsSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    ios_rewarded_ads: {
+    ios_interstitial_ad_id: {
         type: String,
         trim: true
     },
@@ -66,6 +62,11 @@ const adsSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    ios_rewarded_ads: {
+        type: String,
+        trim: true
+    },
+
 
 },
     {

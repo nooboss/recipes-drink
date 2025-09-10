@@ -57,11 +57,11 @@ routes.post("/GetAllCuisines", apiController.GetAllCuisines);
 //Routes For Recipe
 routes.post("/GetAllRecipe", apiController.GetAllRecipe);
 
+routes.post("/GetRecipeById", apiController.GetRecipeById);
+
 routes.post("/popularRecipe", apiController.popularRecipe);
 
 routes.post("/recommendedRecipe", apiController.recommendedRecipe);
-
-routes.post("/GetRecipeById", apiController.GetRecipeById)
 
 routes.post("/GetRecipeByCategoryId", apiController.GetRecipeByCategoryId);
 

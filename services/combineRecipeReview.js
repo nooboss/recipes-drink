@@ -9,15 +9,19 @@ async function combineRecipeReview(recipesOrRecipe, reviews, favouriteRecipes) {
         // particular recipe review
         const matchingReviews = reviews.filter(review => review.recipeId.equals(recipeId) && review.isEnable === true);
 
+        // Calculate rating statistics
+        const ratingCounts = { 'one': 0, 'two': 0, 'three': 0, 'four': 0, 'five': 0 };
         let totalRating = 0;
-        let ratingCounts = { '5': 0, '4': 0, '3': 0, '2': 0, '1': 0 };
 
-        // calculated rating
         matchingReviews.forEach(review => {
-            totalRating += review.rating;
-            ratingCounts[review.rating]++;
+            const rating = Math.floor(review.rating);
+            const ratingKey = ['one', 'two', 'three', 'four', 'five'][rating - 1];
+            if (ratingKey) {
+                ratingCounts[ratingKey]++;
+                totalRating += review.rating;
+            }
         });
-
+        
         // calculated average rating
         const averageRating = matchingReviews.length > 0 ? totalRating / matchingReviews.length : 0;
 

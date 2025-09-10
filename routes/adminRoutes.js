@@ -76,6 +76,8 @@ routes.post("/edit-category", categoryController.editCategory);
 
 routes.get("/delete-category", isLogin, categoryController.deleteCategory);
 
+routes.get("/update-category-status", isLogin, categoryController.updateCategoryStatus);
+
 //Routes For Cuisines
 routes.post("/cuisines", cuisinesController.addCuisines);
 
@@ -97,6 +99,8 @@ routes.get("/edit-recipe", isLogin, recipeController.loadEditRecipe);
 routes.post("/edit-recipe", multiplefile, recipeController.editRecipe);
 
 routes.get("/delete-recipe", isLogin, recipeController.deleteRecipe);
+
+routes.get("/update-recipe-status", isLogin, recipeController.updateRecipeStatus);
 
 // Routes For Gallery
 routes.get("/gallery", isLogin, recipeController.loadGallery);

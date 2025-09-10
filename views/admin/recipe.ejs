@@ -100,7 +100,22 @@
                   </div>
                   <!--begin::Card title-->
                   <!--begin::Card toolbar-->
-                  <div class="card-toolbar">
+                  <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+
+                       <!-- begin::category filter -->
+                       <div class="w-100 mw-200px">
+                        <!--begin::Select2--> 
+                        <select class="form-select form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Category" data-kt-category-filter="category" id="categoryFilter">
+                          <option></option>
+                          <option value="all">All</option>
+                          <% categories.forEach((item) => { %>
+                          <option value="<%= item.name %>"><%= item.name %></option>
+                          <% }) %>
+                        </select>
+                        <!--end::Select2-->
+                      </div>
+                      <!-- end::category filter -->
+
                     <!--begin::Toolbar-->
                     <div class="d-flex justify-content-end" data-kt-subscription-table-toolbar="base">
                       <!--begin::Add recipe -->
@@ -109,6 +124,7 @@
                       <!--end::Add recipe -->
                     </div>
                     <!--end::Toolbar-->
+                    
                   </div>
                   <!--end::Card toolbar-->
                 </div>
@@ -146,6 +162,7 @@
                         <th class=" min-w-100px">Total Time</th>
                         <th class=" min-w-100px">Servings</th>
                         <th class=" min-w-100px">Level</th>
+                        <th class=" min-w-100px">status</th>
                         <th class=" min-w-50px">Actions</th>
                       </tr>
                     </thead>
@@ -156,8 +173,7 @@
                       <tr>
                         <td class="ps-3"><%= i+1 %></td>
                         <td class=" pe-0">
-                          <% const date = new Date(recipe[i].createdAt);const year = date.getFullYear();const month = date.getMonth() + 1; const day = date.getDate(); %>
-                          <%= `${year}-${month}-${day}` %>
+                          <%= recipe[i].createdAt %>
                         </td>
                         <td class=" pe-0">
                           <!--begin::Thumbnail-->
@@ -172,6 +188,27 @@
                         <td class=""><%= recipe[i].totalCookTime %></td>
                         <td class=""><%= recipe[i].servings %></td>
                         <td class=""><%= recipe[i].difficultyLevel %></td>
+                        <% for(let j in loginData){ %>
+                          <% if(String(loginData[j]._id) === String(locals.admin._id)) {%>
+                          <% if(loginData[j].is_admin === 1){ %>
+                          <td class="pe-0" data-bs-toggle="modal" data-bs-target="#kt_modal_change_status<%= i %>">
+                            <% if (recipe[i].status === "Publish") { %>
+                            <div class="badge badge-success">Publish</div>
+                            <% } else { %>
+                            <div class="badge badge-danger">UnPublish</div>
+                            <% } %>
+                          </td>
+                          <% } else if (loginData[j].is_admin === 0){ %>
+                          <td class="pe-0" data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>change recipe status</b>. As a <b>demo admin</b>, you can only view the content.">
+                            <% if (recipe[i].status === "Publish") { %>
+                            <div class="badge badge-success">Publish</div>
+                            <% } else { %>
+                            <div class="badge badge-danger">UnPublish</div>
+                            <% } %>
+                          </td>
+                          <% } %>
+                          <% } %>
+                          <% } %>
                         <td class="pe-0">
                           <div class="d-flex align-items-center">
                             <!-- view -->
@@ -197,13 +234,13 @@
                             </a>
                             <% } else if (loginData[j].is_admin === 0){ %>
                             <!-- edit -->
-                            <a data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>edit intro</b>. As a <b>demo admin</b>, you can only view the content.">
+                            <a data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>edit recipe</b>. As a <b>demo admin</b>, you can only view the content.">
                               <div class="symbol symbol-40px symbol-circle user-select-none">
                                 <div class="symbol-label bg-light-primary text-primary"><i class="ki-solid ki-pencil fs-2 text-primary"></i></div>
                               </div>
                             </a>
                             <!-- delete -->
-                            <a data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>delete intro</b>. As a <b>demo admin</b>, you can only view the content.">
+                            <a data-bs-toggle="modal" data-bs-target="#kt_modal_no_access" data-message="You don't have permission to <b>delete recipe</b>. As a <b>demo admin</b>, you can only view the content.">
                               <div class="symbol symbol-40px symbol-circle user-select-none">
                                 <div class="symbol-label bg-light-danger text-danger"><i class="ki-solid ki-trash fs-2 text-danger"></i></div>
                               </div>
@@ -215,6 +252,42 @@
                         </td>
                       </tr>
                       <!-- end::tr -->
+
+                        <!-- begin::Modal - Enable/Disable category -->
+                        <div class=" modal fade" id="kt_modal_change_status<%= i %>" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title fs-1" id="confirmLabel">Confirmation</h5>
+                                <!--begin::Close-->
+                                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                                  <i class="ki-duotone ki-cross fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                </div>
+                                <!--end::Close-->
+                              </div>
+  
+                              <!-- begin::modal-body -->
+                              <div class="modal-body">
+                                <p class="message text-center fs-3 mb-0">
+                                  Are you sure ..!! you want to <%= recipe[i].status ? 'unpublish' : 'publish' %> the recipe <b><%= recipe[i].name %></b> ..?
+                                </p>
+                              </div>
+                              <!-- end::modal-body -->
+  
+                              <!-- begin::modal-footer -->
+                              <div class="modal-footer">
+                                <a href="/update-recipe-status?id=<%= recipe[i]._id %>">
+                                  <button type="button" class="btn <%= recipe[i].status ===  "Publish" ? 'btn-danger' : 'btn-success' %>">
+                                    <%=  recipe[i].status === "Publish" ? 'UnPublish' : 'Publish' %>
+                                  </button>
+                                </a>
+                              </div>
+                              <!-- end::modal-footer -->
+  
+                            </div>
+                          </div>
+                        </div>
+                        <!--end::Modal - Enable/Disable recipe -->
 
                       <!--begin::Modal - delete recipe-->
                       <div class="modal fade" id="kt_modal_delete_recipe<%= i %>" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
@@ -299,7 +372,7 @@
           <!--begin::Copyright-->
           <div class="text-dark order-2 order-md-1">
             <span class="text-muted fw-semibold me-1"></span>
-            <a href="#" target="_blank" class="text-gray-800 text-hover-primary"></a>
+            <a class="text-gray-800 text-hover-primary"></a>
           </div>
           <!--end::Copyright-->
         </div>

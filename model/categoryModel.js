@@ -6,6 +6,12 @@ const categorySchema = new mongoose.Schema({
         type: String,
         require: true,
         trim:true
+    },
+    status: {
+        type: String,
+        enum: ["Publish", "UnPublish"],
+        default: "Publish",
+        trim: true
     }
 },
     {

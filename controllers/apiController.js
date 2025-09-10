@@ -600,16 +600,12 @@ const GetAllCategory = async (req, res) => {
     try {
 
         // fetch all category
-        const category = await categoryModel.find(req.body);
+        const category = await categoryModel.find({ status: "Publish" }, { status: 0 });
 
         // Check if the category is not found
-        if (!category || !category.length) {
+        if (!category.length) return res.json({ data: { success: 0, message: "Category Not Found", category: category, error: 1 } });
 
-            return res.json({ data: { success: 0, message: "Category Not Found", category: category, error: 1 } });
-        }
-        else {
-            return res.json({ data: { success: 1, message: "Category Found", category: category, error: 0 } });
-        }
+        return res.json({ data: { success: 1, message: "Category Found", category: category, error: 0 } });
 
     } catch (error) {
         console.log("Error during get all category:", error.message);
@@ -649,32 +645,32 @@ const GetAllRecipe = async (req, res) => {
         // Extract data from the request body
         const userId = req.body.userId || undefined;
         const categoryId = req.body.categoryId;
-        // const page = req.body.page || 1;
-        // const per_page_item = req.body.per_page_item || 10;
+        const page = req.body.page || 1;
+        const per_page_item = req.body.per_page_item || 10;
 
         // Calculate the number of documents to skip
-        // const skip = (page - 1) * per_page_item;
+        const skip = (page - 1) * per_page_item;
 
         let filters = {};
 
-        if (categoryId) {
-            filters.categoryId = categoryId;
-        }
+        if (categoryId) { filters.categoryId = categoryId; }
+
+        filters.status = "Publish"
 
         // fetch all recipe
-        const recipe = await recipeModel.find(filters).populate("categoryId cuisinesId");
-        // .skip(skip).limit(per_page_item);
+        const recipe = await recipeModel.find(filters).select({ status: 0 })
+            .populate("categoryId cuisinesId", "_id name").skip(skip).limit(per_page_item);
 
         // fetch all review
         const review = await reviewModel.find().populate({ path: 'userId', select: 'firstname lastname email -_id' });
 
-        // fetch all favourite recipe
+        // fetch all favourite recipe 
         const favouriteRecipe = await favouriteRecipeModel.find({ userId });
 
         const updatedRecipe = await combineRecipeReview(recipe, review, favouriteRecipe);
 
         // Check if the recipe is not found
-        if (!updatedRecipe || !updatedRecipe.length) {
+        if (!updatedRecipe.length) {
 
             return res.json({ data: { success: 0, message: "Recipe Not Found", recipe: updatedRecipe, error: 1 } });
         }
@@ -695,15 +691,15 @@ const popularRecipe = async (req, res) => {
 
         // Extract data from the request body
         const userId = req.body.userId || undefined;
-        // const page = req.body.page || 1;
-        // const per_page_item = req.body.per_page_item || 10;
+        const page = req.body.page || 1;
+        const per_page_item = req.body.per_page_item || 10;
 
-        // // Calculate the number of documents to skip
-        // const skip = (page - 1) * per_page_item;
+        // Calculate the number of documents to skip
+        const skip = (page - 1) * per_page_item;
 
         // fetch all recipe
-        const recipe = await recipeModel.find().populate("categoryId cuisinesId")
-        // .skip(skip).limit(per_page_item);
+        const recipe = await recipeModel.find({ status: "Publish" }, { status: 0 })
+            .populate("categoryId cuisinesId", "_id name").skip(skip).limit(per_page_item);
 
         // fetch all review
         const review = await reviewModel.find().populate({ path: 'userId', select: 'firstname lastname email -_id' });
@@ -716,8 +712,8 @@ const popularRecipe = async (req, res) => {
         // Sorting in descending order of totalRating
         updatedRecipe.sort((a, b) => b.totalRating - a.totalRating);
 
-        // Check if the recipe is not found
-        if (!updatedRecipe || !updatedRecipe.length) {
+        // Check if the recipe is not found 
+        if (!updatedRecipe.length) {
 
             return res.json({ data: { success: 0, message: "Recipe Not Found", recipe: updatedRecipe, error: 1 } });
         }
@@ -739,6 +735,11 @@ const recommendedRecipe = async (req, res) => {
         // Extract data from the request body
         const userId = req.body.userId;
         const deviceId = req.body.deviceId;
+        const page = req.body.page || 1;
+        const per_page_item = req.body.per_page_item || 10;
+
+        // Calculate the number of documents to skip
+        const skip = (page - 1) * per_page_item;
 
         let remainingRecipes;
 
@@ -748,11 +749,12 @@ const recommendedRecipe = async (req, res) => {
         // Check if filterdata is not empty
         if (!filterdata) {
             // If no filters are present, fetch all recipes
-            remainingRecipes = await recipeModel.find().populate("categoryId cuisinesId").sort({ createdAt: -1 }).limit(10);
+            remainingRecipes = await recipeModel.find({ status: "Publish" }, { status: 0 })
+                .populate("categoryId cuisinesId", "_id name").sort({ createdAt: -1 }).skip(skip).limit(per_page_item);
         } else {
             // If filters are present, apply them
-            remainingRecipes = await recipeModel.find({ $or: [{ categoryId: filterdata.categoryId }, { cuisinesId: filterdata.cuisinesId }] })
-                .limit(10).populate("categoryId cuisinesId");
+            remainingRecipes = await recipeModel.find({ $or: [{ categoryId: filterdata.categoryId }, { cuisinesId: filterdata.cuisinesId }], status: "Publish" }, { status: 0 })
+                .populate("categoryId cuisinesId", "_id name").skip(skip).limit(per_page_item);;
         }
 
         // fetch all review
@@ -789,15 +791,13 @@ const GetRecipeById = async (req, res) => {
         const deviceId = req.body.deviceId;
 
         // fetch all recipe
-        const recipe = await recipeModel.findById({ _id: recipeId }).populate("categoryId cuisinesId");
+        const recipe = await recipeModel.findById({ _id: recipeId, status: "Publish" }, { status: 0 })
+            .populate("categoryId cuisinesId", "_id name");
 
         if (!recipe) return res.json({ data: { success: 0, message: "Recipe Not Found", recipe: {}, error: 1 } });
 
         // fetch all review
-        const reviews = await reviewModel.find({ recipeId: recipe._id }).populate({
-            path: 'userId',
-            select: 'firstname lastname email -_id'
-        });
+        const reviews = await reviewModel.find({ recipeId: recipe._id }).populate({ path: 'userId', select: 'firstname lastname email -_id' });
 
         // fetch all favourite recipe
         const favouriteRecipes = await favouriteRecipeModel.find({ userId });
@@ -838,13 +838,11 @@ const GetRecipeByCategoryId = async (req, res) => {
         const categoryId = req.body.categoryId;
 
         // fetch all recipe
-        const recipe = await recipeModel.find({ categoryId: categoryId }).populate("categoryId cuisinesId");
+        const recipe = await recipeModel.find({ categoryId: categoryId, status: "Publish" }, { status: 0 })
+            .populate("categoryId cuisinesId", "_id name");
 
         // fetch all review
-        const review = await reviewModel.find().populate({
-            path: 'userId',
-            select: 'firstname lastname email -_id'
-        });
+        const review = await reviewModel.find().populate({ path: 'userId', select: 'firstname lastname email -_id' });
 
         // fetch all favourite recipe
         const favouriteRecipe = await favouriteRecipeModel.find({ userId });
@@ -852,7 +850,7 @@ const GetRecipeByCategoryId = async (req, res) => {
         const updatedRecipe = await combineRecipeReview(recipe, review, favouriteRecipe);
 
         // Check if the recipe is not found
-        if (!updatedRecipe || !updatedRecipe.length) {
+        if (!updatedRecipe.length) {
             return res.json({ data: { success: 0, message: "Recipe Not Found", recipe: updatedRecipe, error: 1 } });
         }
         else {
@@ -876,13 +874,10 @@ const FilterRecipe = async (req, res) => {
         const cuisines = req.body.cuisinesId;
 
         // fetch all recipe
-        const recipe = await recipeModel.find().populate("categoryId cuisinesId");
+        const recipe = await recipeModel.find({ status: "Publish" }, { status: 0 }).populate("categoryId cuisinesId", "_id name");
 
         //  fetch all review
-        const review = await reviewModel.find().populate({
-            path: 'userId',
-            select: 'firstname lastname email -_id'
-        });
+        const review = await reviewModel.find().populate({ path: 'userId', select: 'firstname lastname email -_id' });
 
         // fetch all favourite recipe
         const favouriteRecipe = await favouriteRecipeModel.find({ userId });
@@ -941,13 +936,10 @@ const SearchRecipes = async (req, res) => {
         const recipeName = req.body.recipeName.replace(/\s+/g, '').toLowerCase();
 
         // fetch all recipe
-        const recipe = await recipeModel.find().populate("categoryId cuisinesId");
+        const recipe = await recipeModel.find({ status: "Publish" }, { status: 0 }).populate("categoryId cuisinesId", "_id name");
 
         // fetch all review
-        const review = await reviewModel.find().populate({
-            path: 'userId',
-            select: 'firstname lastname email -_id'
-        });
+        const review = await reviewModel.find().populate({ path: 'userId', select: 'firstname lastname email -_id' });
 
         //  fetch favourite recipe  particular user id
         const favouriteRecipe = await favouriteRecipeModel.find({ userId });
@@ -1018,10 +1010,7 @@ const GetAllFavouriteRecipes = async (req, res) => {
         const recipe = await recipeModel.find().populate("categoryId cuisinesId");
 
         // fetch review
-        const review = await reviewModel.find().populate({
-            path: 'userId',
-            select: 'firstname lastname email -_id'
-        });
+        const review = await reviewModel.find().populate({ path: 'userId', select: 'firstname lastname email -_id' });
 
         // fetch all favourite recipe
         const favouriteRecipe = await favouriteRecipeModel.find({ userId });
@@ -1099,7 +1088,6 @@ const AddReview = async (req, res) => {
             return res.json({ data: { success: 1, message: "Review added successfully", error: 0 } });
         }
 
-
     } catch (error) {
         console.log("Error during add review:", error.message);
         return res.status(500).json({ data: { success: 0, message: error.message, error: 1 } });
@@ -1139,14 +1127,9 @@ const getAllFaq = async (req, res) => {
         // fetch all faq
         const faq = await faqModel.find({ status: "Publish" }, { status: 0 });
 
-        if (!faq.length) {
+        if (!faq.length) return res.json({ data: { success: 0, message: "FAQ Not Found", faq: faq, error: 1 } });
 
-            return res.json({ data: { success: 0, message: "FAQ Not Found", faq: faq, error: 1 } });
-
-        } else {
-
-            return res.json({ data: { success: 1, message: "FAQ Found", faq: faq, error: 0 } });
-        }
+        return res.json({ data: { success: 1, message: "FAQ Found", faq: faq, error: 0 } });
 
     } catch (error) {
         console.log("Error during get all faq", error.message);
@@ -1161,12 +1144,35 @@ const getAdmob = async (req, res) => {
 
         const ads = await adsModel.findOne();
 
+        const adsData = {
+            "andriod": {
+                android_is_enable: ads.android_is_enable,
+                android_app_ad_id: ads.android_app_ad_id,
+                android_banner_ad_id_is_enable: ads.android_banner_ad_id_is_enable,
+                android_banner_ad_id: ads.android_banner_ad_id,
+                android_interstitial_ad_id_is_enable: ads.android_interstitial_ad_id_is_enable,
+                android_interstitial_ad_id: ads.android_interstitial_ad_id,
+                android_rewarded_ads_is_enable: ads.android_rewarded_ads_is_enable,
+                android_rewarded_ads: ads.android_rewarded_ads
+            },
+            "ios": {
+                ios_is_enable: ads.ios_is_enable,
+                ios_app_ad_id: ads.ios_app_ad_id,
+                ios_banner_ad_id_is_enable: ads.ios_banner_ad_id_is_enable,
+                ios_banner_ad_id: ads.ios_banner_ad_id,
+                ios_interstitial_ad_id_is_enable: ads.ios_interstitial_ad_id_is_enable,
+                ios_interstitial_ad_id: ads.ios_interstitial_ad_id,
+                ios_rewarded_ads_is_enable: ads.ios_rewarded_ads_is_enable,
+                ios_rewarded_ads: ads.ios_rewarded_ads
+            }
+        }
+
         if (!ads) {
 
             return res.json({ data: { success: 0, message: "Ads Not Found", ads: ads, error: 1 } });
         }
         else {
-            return res.json({ data: { success: 1, message: "Ads Found", ads: ads, error: 0 } });
+            return res.json({ data: { success: 1, message: "Ads Found", ads: adsData, error: 0 } });
         }
 
     } catch (error) {
@@ -1182,13 +1188,9 @@ const GetPolicyAndTerms = async (req, res) => {
 
         const settingData = await settingModel.find();
 
-        if (!settingData || !settingData.length) {
+        if (!settingData || !settingData.length) return res.json({ data: { success: 0, message: "Not Found", setting: settingData, error: 1 } });
 
-            return res.json({ data: { success: 0, message: "Not Found", setting: settingData, error: 1 } });
-        }
-        else {
-            return res.json({ data: { success: 1, message: "Found", setting: settingData, error: 0 } });
-        }
+        return res.json({ data: { success: 1, message: "Found", setting: settingData, error: 0 } });
 
     } catch (error) {
         console.log("Error during get private policy:", error.message);
@@ -1204,14 +1206,10 @@ const GetAllNotification = async (req, res) => {
         // fetch all notification
         const notification = await notificationModel.find().sort({ createdAt: -1 });
 
-        if (!notification.length) {
-
+        if (!notification.length)
             return res.json({ data: { success: 0, message: "Recipe Notification Not Found", notification: notification, error: 1 } });
-        }
-        else {
 
-            return res.json({ data: { success: 1, message: "Recipe Notification Found", notification: notification, error: 0 } });
-        }
+        return res.json({ data: { success: 1, message: "Recipe Notification Found", notification: notification, error: 0 } });
 
     } catch (error) {
         console.log("Error during get all notification:", error.message);

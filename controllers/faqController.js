@@ -23,6 +23,13 @@ const addFaq = async (req, res) => {
 
     try {
 
+        const loginData = await loginModel.findById(req.session.userId);
+
+        if (loginData && loginData.is_admin === 0) {
+            req.flash('error', 'You have no access to add FAQ, Only admin have access to this functionality...!!');
+            return res.redirect('back');
+        }
+
         // Extract data from the request body
         const question = req.body.question;
         const answer = req.body.answer.replace(/"/g, '&quot;');;
