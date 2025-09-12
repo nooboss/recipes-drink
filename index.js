@@ -49,7 +49,9 @@ app.use('/', adminRoutes);
 const apiRoutes = require("./routes/apiRoutes");
 app.use('/api', apiRoutes);
 
+const PORT = process.env.PORT || 3000;
 // Start the server on the specified port
-app.listen(process.env.SERVER_PORT, () => {
+// app.listen(process.env.SERVER_PORT, () => {
+app.listen(process.env.PORT, () => {
     console.log("server is start", process.env.SERVER_PORT);
 })
